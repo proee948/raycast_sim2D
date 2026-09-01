@@ -25,5 +25,7 @@ struct vector2
 #define HEIGHT 1000
 #define RAYS_MAX 200
 #define M_PI 3.14159265358979323846
+#define CONTROL_SPEED_ARROWS 10
+#define CONTROL_SPEED_WHEEL 2
 
 #endif
