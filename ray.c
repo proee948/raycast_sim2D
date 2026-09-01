@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
     struct ray ray_arr[RAYS_MAX];
     bool sim_running = true;
     SDL_Event event;
+    int32_t wheel_state = event.wheel.y;
 
     while (sim_running)
     {
@@ -108,6 +109,29 @@ int main(int argc, char *argv[])
                 krug.x = event.motion.x;
                 krug.y = event.motion.y;
                }
+               if(event.type == SDL_KEYDOWN)
+               {
+                    switch(event.key.keysym.scancode)
+                    {
+                        case SDL_SCANCODE_UP: shadow_krug.y -= CONTROL_SPEED_ARROWS       ;break;
+                        case SDL_SCANCODE_DOWN: shadow_krug.y += CONTROL_SPEED_ARROWS     ;break;
+                        case SDL_SCANCODE_LEFT: shadow_krug.x -= CONTROL_SPEED_ARROWS     ;break;
+                        case SDL_SCANCODE_RIGHT: shadow_krug.x += CONTROL_SPEED_ARROWS     ;break;
+                    }
+               }
+               if(event.wheel.type == SDL_MOUSEWHEEL)
+               {
+                if(event.wheel.y > 0)
+                {
+                    shadow_krug.r += CONTROL_SPEED_WHEEL;
+                }
+
+                 if(event.wheel.y < 0)
+                {
+                    shadow_krug.r -= CONTROL_SPEED_WHEEL;
+                }
+               }
+               printf("%d",&wheel_state);
         }
 
         SDL_SetRenderDrawColor(r,0,0,0,255);
@@ -118,6 +142,8 @@ int main(int argc, char *argv[])
 
         draw_fill_circle(r, krug,255,255,0,150); // very gpu intensive calls
         draw_fill_circle(r, shadow_krug,150,0,0,150); //same 
+
+        //(int32_t)
         SDL_RenderPresent(r);
     }
     SDL_DestroyWindow(win);
