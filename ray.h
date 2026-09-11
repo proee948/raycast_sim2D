@@ -22,7 +22,7 @@ struct vector2
 
 
 uint8_t R,G,B,A;
-uint32_t RAYS_MAX  = 5;
+uint32_t RAYS_MAX  = 200;
 #define RAYS_HARD_LIMIT 1000
 
 #define WIDTH 1600
@@ -33,6 +33,8 @@ uint32_t RAYS_MAX  = 5;
 #define MENU_X ((WIDTH/2) - (MENU_WIDTH / 2))
 #define MENU_Y ((HEIGHT/2) - (MENU_HEIGHT / 2))
 #define MENU_HEIGHT 600
-#define MENU_WIDTH 800
+#define MENU_WIDTH 900
+#define Y_MENU_SECTION_RAZMAK 30
+
 
 #endif
