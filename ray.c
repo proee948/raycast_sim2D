@@ -22,12 +22,12 @@ void draw_fill_circle(SDL_Renderer *renderer, struct Circle circle, uint8_t R,ui
     }
 }
 
-void shoot_rays(struct Circle shooter_circle, struct ray ray_Arr[], SDL_Renderer* renderer, struct Circle circle)
+double* shoot_rays(struct Circle shooter_circle, struct ray ray_Arr[], SDL_Renderer* renderer, struct Circle circle)
 {
     double x_start = shooter_circle.x;
     double y_start = shooter_circle.y; 
     double angle_arr[RAYS_MAX]; 
-    double length = 1600;   
+    static double length = 1600;   
 
     int a = 0;
     for (double i = 0; i < RAYS_MAX; i++)
@@ -81,6 +81,7 @@ void shoot_rays(struct Circle shooter_circle, struct ray ray_Arr[], SDL_Renderer
             printf("render failed");
         }
     }
+    return &length;
 }
 
 char* its(void)
@@ -90,11 +91,18 @@ char* its(void)
 
     return buffer;
 }
+char* its2(double *ray_len)
+{
+    static char buffer[50];
+    snprintf(buffer,sizeof(buffer),"%f",*ray_len);
 
-int menu(SDL_Renderer *renderer)
+    return buffer;
+}
+
+int menu(SDL_Renderer *renderer, double *ray_len)
 {
     SDL_Event event;
-    SDL_Texture *t1,*t2,*t3,*t4,*t5;
+    SDL_Texture *t1,*t2,*t3,*t4,*t5,*t6;
     SDL_Surface *surface = SDL_LoadBMP("arrow_right.bmp");
 
     //holy magic numbers, this is horrific but it works 
@@ -139,6 +147,11 @@ int menu(SDL_Renderer *renderer)
         t4 = SDL_CreateTextureFromSurface(renderer,surface);
         SDL_FreeSurface(surface);
 
+        char *s2 = its2(ray_len);
+        surface = TTF_RenderUTF8_Solid(font,s2,txt_col);
+        t6 = SDL_CreateTextureFromSurface(renderer,surface);
+        SDL_FreeSurface(surface);
+
         SDL_SetRenderDrawColor(renderer,255,0,0,0);
         SDL_RenderDrawRect(renderer,&menu);
         SDL_SetRenderDrawColor(renderer,0,0,0,0);
@@ -153,7 +166,7 @@ int menu(SDL_Renderer *renderer)
         SDL_RenderCopy(renderer,t3,NULL,&submenu3);
         SDL_RenderCopy(renderer,t4,NULL,&submenu2);
         SDL_RenderCopy(renderer,t1,NULL,&submenu5);
-        SDL_RenderCopy(renderer,t4,NULL,&submenu6);
+        SDL_RenderCopy(renderer,t6,NULL,&submenu6);
         SDL_RenderCopy(renderer,t3,NULL,&submenu7);
         SDL_RenderCopy(renderer,t5,NULL,&submenu8);
 
@@ -169,10 +182,35 @@ int menu(SDL_Renderer *renderer)
                 TTF_Quit();
                 trigger = 1;
             }
-            if((RAYS_MAX < RAYS_HARD_LIMIT && event.type == SDL_MOUSEBUTTONDOWN) && (event.button.x > submenu1.x) && (event.button.x < (submenu1.x + submenu1.w))){
+            //RAYS left/right click check
+            if((RAYS_MAX < RAYS_HARD_LIMIT && event.type == SDL_MOUSEBUTTONDOWN) && (event.button.x > submenu1.x) && (event.button.x < (submenu1.x + submenu1.w)))
+            {
                 if( (event.button.y > submenu1.y) && (event.button.y < (submenu1.y + submenu1.h)) )
                 {
                     RAYS_MAX++;
+                }
+            }
+            if((RAYS_MAX < RAYS_HARD_LIMIT && event.type == SDL_MOUSEBUTTONDOWN) && (event.button.x > submenu3.x) && (event.button.x < (submenu3.x + submenu3.w)))
+            {
+                if( (event.button.y > submenu3.y) && (event.button.y < (submenu3.y + submenu3.h)) )
+                {
+                    RAYS_MAX--;
+                }
+            }
+            //RAY LENGHT left/right click check
+            if( (RAYS_MAX < RAYS_HARD_LIMIT && event.type == SDL_MOUSEBUTTONDOWN) && (event.button.x > submenu5.x) && (event.button.x < (submenu5.x + submenu5.w)))
+            {
+                if( (event.button.y > submenu5.y) && (event.button.y < (submenu5.y + submenu5.h)) )
+                {
+                    *ray_len += 50;
+                }
+                
+            }
+            if( (RAYS_MAX < RAYS_HARD_LIMIT && event.type == SDL_MOUSEBUTTONDOWN) && (event.button.x > submenu7.x) && (event.button.x < (submenu7.x + submenu7.w)))
+            {
+                if( (event.button.y > submenu7.y) && (event.button.y < (submenu7.y + submenu7.h)) )
+                {
+                    *ray_len -= 50;
                 }
             }
                  
@@ -195,12 +233,21 @@ int main(int argc, char *argv[])
 
     while (sim_running)
     {
+        SDL_SetRenderDrawColor(r,0,0,0,255);
+        SDL_RenderClear(r);
+
+        SDL_SetRenderDrawColor(r,255,255,0,255); //ray color
+        double *lenght = shoot_rays(krug,ray_arr,r,shadow_krug);
+        draw_fill_circle(r, krug,R,G,B,A); // very gpu intensive calls
+
+        draw_fill_circle(r, shadow_krug,255,0,0,150); //same 
+        SDL_RenderPresent(r);
         while (SDL_PollEvent(&event))
         {
             //
             if( event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_Q)
             {
-                menu(r);
+                menu(r,lenght);
             }
             //
 
@@ -233,19 +280,8 @@ int main(int argc, char *argv[])
                  if(event.wheel.y < 0){
                     shadow_krug.r -= CONTROL_SPEED_WHEEL;
                 }
-
             }
-        }
-
-        SDL_SetRenderDrawColor(r,0,0,0,255);
-        SDL_RenderClear(r);
-
-        SDL_SetRenderDrawColor(r,255,255,0,255); //ray color
-        shoot_rays(krug,ray_arr,r,shadow_krug);
-        draw_fill_circle(r, krug,R,G,B,A); // very gpu intensive calls
-
-        draw_fill_circle(r, shadow_krug,255,0,0,150); //same 
-        SDL_RenderPresent(r);
+        }       
     }
     SDL_DestroyWindow(win);
     SDL_Quit();
