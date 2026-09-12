@@ -94,15 +94,25 @@ char* its(void)
 char* its2(double *ray_len)
 {
     static char buffer[50];
-    snprintf(buffer,sizeof(buffer),"%f",*ray_len);
+    snprintf(buffer,sizeof(buffer),"%.0f",*ray_len);
 
     return buffer;
+}
+struct CLS its3(void)
+{
+    struct CLS cls;
+    snprintf(cls.red,sizeof(cls.red),"%d",R);
+    snprintf(cls.blue,sizeof(cls.blue),"%d",B);
+    snprintf(cls.green,sizeof(cls.green),"%d",G);
+    snprintf(cls.alpha,sizeof(cls.alpha),"%d",A);
+
+    return cls;
 }
 
 int menu(SDL_Renderer *renderer, double *ray_len)
 {
     SDL_Event event;
-    SDL_Texture *t1,*t2,*t3,*t4,*t5,*t6;
+    SDL_Texture *t1,*t2,*t3,*t4,*t5,*t6,*t7,*t8;
     SDL_Surface *surface = SDL_LoadBMP("arrow_right.bmp");
 
     //holy magic numbers, this is horrific but it works 
@@ -116,6 +126,12 @@ int menu(SDL_Renderer *renderer, double *ray_len)
     SDL_Rect submenu6 = {.h = (MENU_HEIGHT / 8), .w = (MENU_WIDTH / 6), .x = submenu2.x ,.y = (submenu2.y + submenu2.h)};
     SDL_Rect submenu7 = {.h = (MENU_HEIGHT / 12), .w = (MENU_WIDTH / 12), .x = submenu3.x ,.y = (submenu3.y + submenu3.h) + Y_MENU_SECTION_RAZMAK};
     SDL_Rect submenu8 = {.h = (MENU_HEIGHT / 8), .w = (MENU_WIDTH / 3), .x = submenu4.x ,.y = (submenu4.y + submenu4.h)};
+    SDL_Rect help = {.h = MENU_HEIGHT / 12, .w = MENU_WIDTH, .x = MENU_X, .y = MENU_Y + (MENU_HEIGHT)};
+
+    SDL_Rect submenu9  = {.h = (MENU_HEIGHT / 12), .w = (MENU_WIDTH / 12), .x = submenu5.x, .y = (submenu5.y + submenu5.h) + Y_MENU_SECTION_RAZMAK};
+    SDL_Rect submenu10 = {.h = (MENU_HEIGHT / 8),  .w = (MENU_WIDTH / 6),  .x = submenu6.x, .y = (submenu6.y + submenu6.h)};
+    SDL_Rect submenu11 = {.h = (MENU_HEIGHT / 12), .w = (MENU_WIDTH / 12), .x = submenu7.x, .y = (submenu7.y + submenu7.h) + Y_MENU_SECTION_RAZMAK};
+    SDL_Rect submenu12 = {.h = (MENU_HEIGHT / 8),  .w = (MENU_WIDTH / 3),  .x = submenu8.x, .y = (submenu8.y + submenu8.h)};    
 
     bool trigger = 0;
     t1 = SDL_CreateTextureFromSurface(renderer,surface);
@@ -137,6 +153,10 @@ int menu(SDL_Renderer *renderer, double *ray_len)
     t5 = SDL_CreateTextureFromSurface(renderer,surface);
     SDL_FreeSurface(surface);
 
+    surface = TTF_RenderUTF8_Solid(font,"Q to enter menu / A to exit",txt_col);
+    t7 = SDL_CreateTextureFromSurface(renderer,surface);
+    SDL_FreeSurface(surface);
+
     SDL_SetRenderDrawColor(renderer,0,0,0,0);
     SDL_RenderClear(renderer);
 
@@ -152,26 +172,29 @@ int menu(SDL_Renderer *renderer, double *ray_len)
         t6 = SDL_CreateTextureFromSurface(renderer,surface);
         SDL_FreeSurface(surface);
 
+        struct CLS cls = its3();
+        //surface = TTF_RenderUTF8_Solid(font,cls.,txt_col);
+        //t8 = SDL_CreateTextureFromSurface(renderer,surface);
+        //stopped here, struct with RGBA values is passed here need to make dynamic submenu10 string that gauges current color and displays in words
+        SDL_FreeSurface(surface);
+
         SDL_SetRenderDrawColor(renderer,255,0,0,0);
-        SDL_RenderDrawRect(renderer,&menu);
+        SDL_RenderDrawRect(renderer,&menu); 
         SDL_SetRenderDrawColor(renderer,0,0,0,0);
 
-        SDL_RenderDrawRect(renderer,&submenu1);
-        SDL_RenderDrawRect(renderer,&submenu4);
-        SDL_RenderDrawRect(renderer,&submenu3);
-        SDL_RenderDrawRect(renderer,&submenu2);
-
-        SDL_RenderCopy(renderer,t1,NULL,&submenu1);  // draw "arrow _right"
-        SDL_RenderCopy(renderer,t2,NULL,&submenu4); //draw "RAYS"
+        SDL_RenderCopy(renderer,t1,NULL,&submenu1);  
+        SDL_RenderCopy(renderer,t2,NULL,&submenu4); 
         SDL_RenderCopy(renderer,t3,NULL,&submenu3);
         SDL_RenderCopy(renderer,t4,NULL,&submenu2);
         SDL_RenderCopy(renderer,t1,NULL,&submenu5);
         SDL_RenderCopy(renderer,t6,NULL,&submenu6);
         SDL_RenderCopy(renderer,t3,NULL,&submenu7);
         SDL_RenderCopy(renderer,t5,NULL,&submenu8);
+        SDL_RenderCopy(renderer,t1,NULL,&submenu9);
+        SDL_RenderCopy(renderer,t3,NULL,&submenu11);
+        SDL_RenderCopy(renderer,t7,NULL,&help);
 
         SDL_RenderPresent(renderer);
-
         SDL_SetRenderDrawColor(renderer,0,0,0,0);
         SDL_RenderClear(renderer);
 
