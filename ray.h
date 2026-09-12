@@ -19,6 +19,13 @@ struct vector2
     double x;
     double y;
 };
+struct CLS
+{
+    uint8_t red[10];
+    uint8_t green[10];
+    uint8_t blue[10];
+    uint8_t alpha[10];
+};
 
 
 uint8_t R,G,B,A;
