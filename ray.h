@@ -27,9 +27,12 @@ struct CLS
     uint8_t alpha[10];
 };
 
-
-uint8_t R,G,B,A;
+uint8_t R = 255;
+uint8_t B = 255;
+uint8_t G = 255;
+uint8_t A = 255;
 uint32_t RAYS_MAX  = 200;
+
 #define RAYS_HARD_LIMIT 1000
 
 #define WIDTH 1600
