@@ -63,3 +63,4 @@ A real-time 2D ray-casting simulation built with SDL2. A light source casts a co
 - [ ]texture leaks
 - [ ]resizable window
 - [ ] code cleanup and redundancy removal
+- [ ] makefile
