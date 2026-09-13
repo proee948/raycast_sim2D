@@ -37,6 +37,9 @@ A real-time 2D ray-casting simulation built with SDL2. A light source casts a co
 
     `sudo apt install libsdl2-dev libsdl2-ttf-dev`
 
+### Windows (via MSYS2 UCRT64)
+    `gcc ray.c -o ray -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf`
+
 ## Building
 
    `gcc main.c -o raysim -lSDL2 -lSDL2_ttf -lm`
