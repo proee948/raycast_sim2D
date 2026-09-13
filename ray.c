@@ -5,6 +5,7 @@
 #include "ray.h"
 #include <string.h>
 #include <SDL2/SDL_ttf.h>
+#include <stdint.h>
 
 void draw_fill_circle(SDL_Renderer *renderer, struct Circle circle, uint8_t R,uint8_t G,uint8_t B,uint8_t A)
 {
