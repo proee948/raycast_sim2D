@@ -101,10 +101,10 @@ char* its2(double *ray_len)
 struct CLS its3(void)
 {
     struct CLS cls;
-    snprintf(cls.red,sizeof(cls.red),"%d",R);
-    snprintf(cls.blue,sizeof(cls.blue),"%d",B);
-    snprintf(cls.green,sizeof(cls.green),"%d",G);
-    snprintf(cls.alpha,sizeof(cls.alpha),"%d",A);
+    snprintf(cls.red,sizeof(cls.red),"%d RED",R);
+    snprintf(cls.blue,sizeof(cls.blue),"%d BLUE",B);
+    snprintf(cls.green,sizeof(cls.green),"%d GREEN",G);
+    snprintf(cls.alpha,sizeof(cls.alpha),"%d INVISIBLE",A);
 
     return cls;
 }
@@ -112,7 +112,7 @@ struct CLS its3(void)
 int menu(SDL_Renderer *renderer, double *ray_len)
 {
     SDL_Event event;
-    SDL_Texture *t1,*t2,*t3,*t4,*t5,*t6,*t7,*t8;
+    SDL_Texture *t1,*t2,*t3,*t4,*t5,*t6,*t7,*t8,*t9 = NULL;  
     SDL_Surface *surface = SDL_LoadBMP("arrow_right.bmp");
 
     //holy magic numbers, this is horrific but it works 
@@ -130,7 +130,6 @@ int menu(SDL_Renderer *renderer, double *ray_len)
 
     SDL_Rect submenu9  = {.h = (MENU_HEIGHT / 12), .w = (MENU_WIDTH / 12), .x = submenu5.x, .y = (submenu5.y + submenu5.h) + Y_MENU_SECTION_RAZMAK};
     SDL_Rect submenu10 = {.h = (MENU_HEIGHT / 8),  .w = (MENU_WIDTH / 6),  .x = submenu6.x, .y = (submenu6.y + submenu6.h)};
-    SDL_Rect submenu11 = {.h = (MENU_HEIGHT / 12), .w = (MENU_WIDTH / 12), .x = submenu7.x, .y = (submenu7.y + submenu7.h) + Y_MENU_SECTION_RAZMAK};
     SDL_Rect submenu12 = {.h = (MENU_HEIGHT / 8),  .w = (MENU_WIDTH / 3),  .x = submenu8.x, .y = (submenu8.y + submenu8.h)};    
 
     bool trigger = 0;
@@ -157,6 +156,15 @@ int menu(SDL_Renderer *renderer, double *ray_len)
     t7 = SDL_CreateTextureFromSurface(renderer,surface);
     SDL_FreeSurface(surface);
 
+    surface = TTF_RenderUTF8_Solid(font,"TARGET COLOR",txt_col);
+    t8 = SDL_CreateTextureFromSurface(renderer,surface);
+    SDL_FreeSurface(surface);
+
+    struct CLS colors = its3(); // get the struct of color string arrs
+    struct CLS *ptr = &colors;
+
+    int color_counter = 0;         
+    bool color_text_dirty = true;   
     SDL_SetRenderDrawColor(renderer,0,0,0,0);
     SDL_RenderClear(renderer);
 
@@ -172,11 +180,22 @@ int menu(SDL_Renderer *renderer, double *ray_len)
         t6 = SDL_CreateTextureFromSurface(renderer,surface);
         SDL_FreeSurface(surface);
 
-        struct CLS cls = its3();
-        //surface = TTF_RenderUTF8_Solid(font,cls.,txt_col);
-        //t8 = SDL_CreateTextureFromSurface(renderer,surface);
-        //stopped here, struct with RGBA values is passed here need to make dynamic submenu10 string that gauges current color and displays in words
-        SDL_FreeSurface(surface);
+        if (color_text_dirty)
+{
+    if (t9) SDL_DestroyTexture(t9);
+    const char *label;
+    switch(color_counter)
+    {
+        case 0: label = ptr->red;   R = 255; G = 0;   B = 0;   A = 255; break;
+        case 1: label = ptr->green; R = 0;   G = 255; B = 0;   A = 255; break;
+        case 2: label = ptr->blue;  R = 0;   G = 0;   B = 255; A = 255; break;
+        default: label = ptr->alpha; R = 255; G = 255; B = 255; A = 255; break;
+    }
+    surface = TTF_RenderUTF8_Solid(font,label,txt_col);
+    t9 = SDL_CreateTextureFromSurface(renderer,surface);
+    SDL_FreeSurface(surface);
+    color_text_dirty = false;
+}
 
         SDL_SetRenderDrawColor(renderer,255,0,0,0);
         SDL_RenderDrawRect(renderer,&menu); 
@@ -191,7 +210,8 @@ int menu(SDL_Renderer *renderer, double *ray_len)
         SDL_RenderCopy(renderer,t3,NULL,&submenu7);
         SDL_RenderCopy(renderer,t5,NULL,&submenu8);
         SDL_RenderCopy(renderer,t1,NULL,&submenu9);
-        SDL_RenderCopy(renderer,t3,NULL,&submenu11);
+        SDL_RenderCopy(renderer,t8,NULL,&submenu12);
+        SDL_RenderCopy(renderer,t9,NULL,&submenu10); 
         SDL_RenderCopy(renderer,t7,NULL,&help);
 
         SDL_RenderPresent(renderer);
@@ -236,7 +256,14 @@ int menu(SDL_Renderer *renderer, double *ray_len)
                     *ray_len -= 50;
                 }
             }
-                 
+            if( (RAYS_MAX < RAYS_HARD_LIMIT && event.type == SDL_MOUSEBUTTONDOWN) && (event.button.x > submenu9.x) && (event.button.x < (submenu9.x + submenu9.w)))
+            {
+                if( (event.button.y > submenu9.y) && (event.button.y < (submenu9.y + submenu9.h)) )
+                {
+                    color_counter = (color_counter + 1) % 4;
+                    color_text_dirty = true;                  
+                }
+            }    
         }
     } 
     return 0;
